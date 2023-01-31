@@ -25,11 +25,12 @@ class Excel:
            
         
         else:
-            sheet.append(("IMAGE URL","PRODUCT TITLE","PRICE","PART NUMBER","DESCRIPTION","STATUS"))
-
+           
             wb = openpyxl.Workbook()
 
             sheet = wb.active
+            sheet.append(("IMAGE URL","PRODUCT TITLE","PRICE","PART NUMBER","DESCRIPTION","STATUS"))
+
 
         sheet.append((img_url,product_title,price,part_number,description,status))
 
