@@ -18,12 +18,17 @@ colorama.init()
 class Excel:
     def __init__(self,img_url,product_title,price,part_number,description,status):
         file_name="new_product.xlsx"
+        skip_product=False
         if os.path.exists(file_name):
             wb=openpyxl.load_workbook(file_name)
             sheet=wb.active
-
+            # search for products with same title
+            search=[sheet[f"B{k}"].value for k in range(1,sheet.max_row+1)]
            
-        
+            if product_title in search:
+                skip_product=True
+            del search
+
         else:
            
             wb = openpyxl.Workbook()
@@ -31,10 +36,12 @@ class Excel:
             sheet = wb.active
             sheet.append(("IMAGE URL","PRODUCT TITLE","PRICE","PART NUMBER","DESCRIPTION","STATUS"))
 
+        if not skip_product:
+            sheet.append((img_url,product_title,price,part_number,description,status))
 
-        sheet.append((img_url,product_title,price,part_number,description,status))
-
-        wb.save(file_name)
+            wb.save(file_name)
+        else:
+            print(colored('[  ]product already exists in excel',"green"))
 
 
 
@@ -252,11 +259,16 @@ class shopify_scraper:
 
                     parsed_num=bs4.BeautifulSoup(part_num,"lxml")
 
-                    img_url=parsed_num.find("div",{"class":"slide__content"}).find("a")["href"]
+                    img_url=parsed_num.find("div",{"class":"slide__content"})
 
                     if ".jpg" not in img_url:
                          
-                        img_url=parsed_num.find("div",{"class":"slick__slide"}).find("a")["href"]
+                        img_url=parsed_num.find("div",{"class":"slick__slide"})
+                    
+                    try:
+                        img_url=img_url.find("a")["href"]
+                    except Exception as e:
+                        img_url="could not get image"
 
 
                     product_description=parsed_num.find('div',{"itemprop":"description"})
@@ -327,8 +339,7 @@ class shopify_scraper:
         self.driver.close()
 
 if __name__=="__main__":
-  
-  
+    
     scrape=shopify_scraper()
     scrape.start()
     
