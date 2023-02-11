@@ -9,10 +9,22 @@ from selenium.common.exceptions import TimeoutException,ElementClickInterceptedE
 import bs4
 import requests
 import colorama
-
+import datetime as dt
 # import openpyxl module
 import openpyxl
 import os
+import csv
+
+
+title=['Handle', 'Title', 'Body (HTML)', 'Vendor', 'Product Category', 'Type', 'Tags', 'Published', 'Option1 Name', 'Option1 Value', 'Option2 Name', 'Option2 Value', 'Option3 Name', 'Option3 Value', 'Variant SKU', 
+       'Variant Grams', 'Variant Inventory Tracker', 'Variant Inventory Qty', 'Variant Inventory Policy', 'Variant Fulfillment Service', 'Variant Price', 'Variant Compare At Price', 'Variant Requires Shipping',
+         'Variant Taxable', 'Variant Barcode', 'Image Src', 'Image Position', 'Image Alt Text', 'Gift Card', 'SEO Title', 'SEO Description', 'Google Shopping / Google Product Category', 'Google Shopping / Gender',
+           'Google Shopping / Age Group', 'Google Shopping / MPN', 'Google Shopping / AdWords Grouping', 'Google Shopping / AdWords Labels', 'Google Shopping / Condition', 'Google Shopping / Custom Product', 
+           'Google Shopping / Custom Label 0', 'Google Shopping / Custom Label 1', 'Google Shopping / Custom Label 2', 'Google Shopping / Custom Label 3', 'Google Shopping / Custom Label 4', 'Variant Image', 
+           'Variant Weight Unit', 'Variant Tax Code', 'Cost per item', 'Price / International', 'Compare At Price / International', 'Status']
+
+
+
 colorama.init()
 
 class Excel:
@@ -42,6 +54,201 @@ class Excel:
             wb.save(file_name)
         else:
             print(colored('[  ]product already exists in excel',"green"))
+
+
+class convert_to_csv:
+    def __init__(self):
+        pass 
+    def convert_file(self):
+
+        file_name="new_product.xlsx"
+        wb=openpyxl.load_workbook(file_name)
+        sheet=wb.active
+        # search for products with same title
+
+        # image urls
+        main_rows=[]
+        
+        
+        csv_file=open("new_product.csv","w", encoding='utf-8')
+        csv_writer=csv.writer(csv_file,delimiter=",",lineterminator='\r')
+
+        csv_writer.writerow(title)
+
+
+       
+        column_a="Image Src"
+        column_a_rows=[]
+        for k in range(2,sheet.max_row+1):
+            row_vals=['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'active']
+
+            print(colored(f"creating image sources {round(k/sheet.max_row+1,4*100)}%","green"))
+           
+
+            val_position=title.index(column_a)
+
+            row_vals[val_position]= sheet[f"A{k}"].value
+
+            column_a_rows.append(row_vals)
+
+            #csv_writer.writerow(row_vals)
+
+
+
+        # product title
+        column_b="Title"
+        column_b_rows=[]
+        column_zero="Handle"
+        for k in range(2,sheet.max_row+1):
+            print(colored(f"creating titles {round(k/sheet.max_row+1*100,4)}%","green"))
+        
+
+            row_vals=['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'active']
+
+            val_position=title.index(column_b)
+
+            row_vals[val_position]= sheet[f"B{k}"].value
+
+            
+            val_position=title.index(column_zero)
+
+            row_vals[val_position]= sheet[f"B{k}"].value
+
+            column_b_rows.append(row_vals)
+
+
+           
+
+           # csv_writer.writerow(row_vals)
+        
+        # price
+        column_c="Variant Price"
+        colum_c_rows=[]
+        for k in range(2,sheet.max_row+1):
+            print(colored(f"creating prices {round(k/sheet.max_row+1*100,4)}%","green"))
+           
+            row_vals=['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'active']
+
+            val_position=title.index(column_c)
+
+            row_vals[val_position]= sheet[f"C{k}"].value
+
+            colum_c_rows.append(row_vals)
+
+
+            #csv_writer.writerow(row_vals)
+        
+        # part number
+        column_d="Variant SKU"
+        column_d_rows=[]
+        for k in range(2,sheet.max_row+1):
+            print(colored(f"creating sku numbers {round(k/sheet.max_row+1*100,4)}%","green"))
+
+            row_vals=['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'active']
+
+            val_position=title.index(column_d)
+
+            row_vals[val_position]= sheet[f"D{k}"].value
+
+            column_d_rows.append(row_vals)
+
+
+         #description
+        column_e="SEO Description"
+        column_e_rows=[]
+        options = uc.ChromeOptions()
+        # options.headless=True
+        # options.add_argument('--headless')
+
+        self.driver2 = uc.Chrome(options=options) 
+
+        self.driver2.get("https://translate.google.co.il/?sl=auto&tl=iw&op=translate")
+        max_rows=sheet.max_row+1
+        start_time=time.time()
+        for k in range(2,max_rows):
+           
+            desc=(sheet[f"E{k}"].value)
+
+            hebrew_desc=self.hebrew_translator(desc,max_rows,start_time,k)
+
+            row_vals=['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'active']
+
+            val_position=title.index(column_e)
+
+            row_vals[val_position]= hebrew_desc
+            column_e_rows.append(row_vals)
+
+
+        self.driver2.close()
+
+        for rows in range(len(column_a_rows)):
+            row_vals=['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'deny', 'manual', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 'active']
+
+            for column in range(len(column_a_rows[rows])):
+                if column_a_rows[rows][column]:
+                    row_vals[column]=column_a_rows[rows][column]
+                if column_b_rows[rows][column]:
+                    row_vals[column]=column_b_rows[rows][column].strip().replace("\n"," ")
+                if column_d_rows[rows][column]:
+                    row_vals[column]=column_d_rows[rows][column]
+                if column_d_rows[rows][column]:
+                    row_vals[column]=column_d_rows[rows][column]
+                if column_e_rows[rows][column]:
+                    row_vals[column]=column_e_rows[rows][column].strip().replace("\n"," ")
+            " write each row"
+           
+            csv_writer.writerow(row_vals)
+
+        csv_file.close()
+
+        print("program finished with zero errors")
+
+    def hebrew_translator(self,desc,enum_trans,start_time,current_iter):
+    
+        print("")
+        k=current_iter+1
+        print(colored(f"{time.ctime()} translation progress {round(k/enum_trans*100,4)}% {self.calcProcessTime(start_time,k,enum_trans)}","red"))
+        print(f"{desc} ")
+
+        selected_elements=WebDriverWait(self.driver2, 2000).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR,
+                                        'textarea[aria-label="טקסט מקור"]')))
+        
+        selected_elements.send_keys(desc)
+
+        time.sleep(3)
+
+        translated=WebDriverWait(self.driver2, 2000).until(
+        EC.presence_of_element_located((By.CSS_SELECTOR,
+                                        'div[class="lRu31"]')))
+        
+
+        print(colored(f"[ ] {translated.text}","green"))
+
+    
+
+
+        selected_elements.clear()
+        time.sleep(1)
+
+        return translated.text
+
+
+    
+    def calcProcessTime(self,starttime, cur_iter, max_iter):
+
+        telapsed = time.time() - starttime
+        testimated = (telapsed/cur_iter)*(max_iter)
+
+        finishtime = starttime + testimated
+        finishtime = f'eta {dt.datetime.fromtimestamp(finishtime).strftime("%H:%M:%S")}'  # in time
+
+        lefttime = testimated-telapsed  # in seconds
+
+        time_left=f"remaining/time {dt.timedelta(seconds=lefttime)}"
+
+        return (time_left, finishtime)
+        
 
 
 
@@ -260,14 +467,18 @@ class shopify_scraper:
                     parsed_num=bs4.BeautifulSoup(part_num,"lxml")
 
                     img_url=parsed_num.find("div",{"class":"slide__content"})
-
-                    if ".jpg" not in img_url:
-                         
-                        img_url=parsed_num.find("div",{"class":"slick__slide"})
                     
-                    try:
-                        img_url=img_url.find("a")["href"]
-                    except Exception as e:
+                    if img_url:
+                        if ".jpg" not in img_url:
+                            
+                            img_url=parsed_num.find("div",{"class":"slick__slide"})
+                        
+                        try:
+                            img_url=img_url.find("a")["href"]
+                        except Exception as e:
+                            img_url="could not get image"
+
+                    else:
                         img_url="could not get image"
 
 
@@ -340,6 +551,9 @@ class shopify_scraper:
 
 if __name__=="__main__":
     
-    scrape=shopify_scraper()
-    scrape.start()
+    # scrape=shopify_scraper()
+    # scrape.start()
     
+    convert_to_csv().convert_file()
+
+
